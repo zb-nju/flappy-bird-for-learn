@@ -42,7 +42,7 @@ class Brain(metaclass=ABCMeta):
 }
 ```
 
-![QQ截图20200704165254](F:\Typora IMG\QQ截图20200704165254.png)
+![1](./screenshot/1.png)
 
 当你实现完`Brain`后，你可以通过`flappybird.py`中的`FlappyBirdGame`传入你的Brain
 
@@ -59,3 +59,11 @@ g.run()
 第二个参数是鸟的数量，或许你想让多只鸟同时飞行（例如遗传算法）
 
 第三个参数是Brain的`List`，每只鸟的Brain都是独立的
+
+
+
+**获取结果**
+
+一次游戏结束意味着所有的鸟死亡，`FlappyBirdGame`会记录每只鸟死亡时的分数以及所有数据（整个`Bird`对象）
+
+通过调用`result`方法即可得到这个list

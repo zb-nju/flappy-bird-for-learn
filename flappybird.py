@@ -441,17 +441,20 @@ class FlappyBirdGame():
                     nextPipe = p
                     break
                 
+            
             for bird in self.birds:
-                if bird.brain.decideFlap({
-                    "bottomPipeHeight": nextPipe.bottom_height_px,            
-                    "topPipeHeight": nextPipe.top_height_px,
-                    "pipeWidth": PipePair.WIDTH,
-                    "distance": nextPipe.X - BIRD_X,
-                    "height": bird.Height,
-                    "velY": bird.vel_y,
-                    "accY": bird.acc_y,
-                    "velX": ANIMATION_SPEED * frames_to_msec(1)               
-                }):
+                params = {
+                        "bottomPipeHeight": nextPipe.bottom_height_px,            
+                        "topPipeHeight": nextPipe.top_height_px,
+                        "pipeWidth": PipePair.WIDTH,
+                        "distance": nextPipe.X - BIRD_X,
+                        "height": bird.Height,
+                        "velY": bird.vel_y,
+                        "accY": bird.acc_y,
+                        "velX": ANIMATION_SPEED * frames_to_msec(1), 
+                        "score": score            
+                }
+                if bird.brain.decideFlap(params):                  
                     bird.flap() 
 
 
@@ -459,8 +462,18 @@ class FlappyBirdGame():
             for bird in self.birds[::-1]:
                 pipe_collision = any(p.collides_with(bird) for p in self.pipes)
                 if pipe_collision or 0 >= bird.y or bird.y >= WIN_HEIGHT - Bird.HEIGHT:
-                    bird.setScore(score)
-                    self.dead_birds.append(bird)
+                    params = {
+                        "bottomPipeHeight": nextPipe.bottom_height_px,            
+                        "topPipeHeight": nextPipe.top_height_px,
+                        "pipeWidth": PipePair.WIDTH,
+                        "distance": nextPipe.X - BIRD_X,
+                        "height": bird.Height,
+                        "velY": bird.vel_y,
+                        "accY": bird.acc_y,
+                        "velX": ANIMATION_SPEED * frames_to_msec(1), 
+                        "score": score            
+                    }
+                    self.dead_birds.append([bird,params])
                     self.birds.remove(bird)
                     if not self.birds:
                         done = True
@@ -497,74 +510,6 @@ class FlappyBirdGame():
         self.view.quitView()
     
     
-def main():
-    """The application's entry point.
-
-    If someone executes this module (instead of importing it, for
-    example), this function is called.
-    """
-
-    view = GameView()
-
-    # the bird stays in the same x position, so bird.x is a constant
-    # center bird on screen
-    bird = Bird(BIRD_X, int(WIN_HEIGHT/2 - Bird.HEIGHT/2),
-                (view.getImage('bird-wingup'), view.getImage('bird-wingdown')))
-
-    pipes = deque()
-
-    frame_clock = 0  # this counter is only incremented if the game isn't paused
-    score = 0
-    done = False
-    while not done:
-        
-
-        # Handle this 'manually'.  If we used pygame.time.set_timer(),
-        # pipe addition would be messed up when paused.
-        if not (frame_clock % msec_to_frames(PipePair.ADD_INTERVAL)):
-            pp = PipePair(view.getImage('pipe-end'), view.getImage('pipe-body'))
-            pipes.append(pp)
-
-        for p in pipes:
-            if p.in_front_of(bird):
-                nextPipe = p
-                break
-        if bird.brain.decideFlap({
-            "bottomPipeHeight": nextPipe.bottom_height_px,            
-            "topPipeHeight": nextPipe.top_height_px,
-            "distance": nextPipe.X - BIRD_X,
-            "height": bird.Height,
-            "velY": bird.vel_y,
-            "accY": bird.acc_y,
-            "velX": ANIMATION_SPEED * frames_to_msec(1)               
-        }):
-            bird.flap() 
-
-
-        # check for collisions
-        pipe_collision = any(p.collides_with(bird) for p in pipes)
-        if pipe_collision or 0 >= bird.y or bird.y >= WIN_HEIGHT - Bird.HEIGHT:
-            done = True
-
-        # update models
-        while pipes and not pipes[0].visible:
-            pipes.popleft()
-            
-        for p in pipes:
-            p.update()
-        
-        bird.update()
-        
-        for p in pipes:
-            if p.x + PipePair.WIDTH < bird.x and not p.score_counted:
-                score += 1
-                p.score_counted = True
-        # render 
-        view.render(pipes,bird,score) 
-        
-        frame_clock += 1
-    print('Game over! Score: %i' % score)
-    view.quitView()
 
 
 if __name__ == '__main__':
