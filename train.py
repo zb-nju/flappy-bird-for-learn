@@ -20,7 +20,10 @@ class HappyBrain(fb.Brain):
             return False
         r = random.randint(0,1000)       
         return r > 940   
-    
+
+
+
+
 def train():
     brain = HappyBrain()
     g = fb.FlappyBirdGame(60,1,[brain])
